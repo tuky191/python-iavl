@@ -4,7 +4,7 @@
     flake-utils.url = "github:numtide/flake-utils";
     rocksdb-src = {
       url = "github:facebook/rocksdb/v6.29.5";
-      flake = false;
+      flake = true;
     };
   };
 
@@ -40,12 +40,14 @@
           projectDir = ./.;
           overrides = callPackage overrides { };
           inherit groups;
+          pythonPath = [ rocksdb ];
         };
       iavl-cli = { poetry2nix, callPackage, groups ? [ "rocksdb" ] }:
         poetry2nix.mkPoetryApplication {
           projectDir = ./.;
           overrides = callPackage overrides { };
           inherit groups;
+          pythonPath = [ rocksdb ];          
         };
     in
     (flake-utils.lib.eachDefaultSystem
