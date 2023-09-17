@@ -40,14 +40,14 @@
           projectDir = ./.;
           overrides = callPackage overrides { };
           inherit groups;
-          pythonPath = [ rocksdb ];
+          pythonPath = [ "rocksdb" ];
         };
       iavl-cli = { poetry2nix, callPackage, groups ? [ "rocksdb" ] }:
         poetry2nix.mkPoetryApplication {
           projectDir = ./.;
           overrides = callPackage overrides { };
           inherit groups;
-          pythonPath = [ rocksdb ];          
+          pythonPath = [ "rocksdb" ];          
         };
     in
     (flake-utils.lib.eachDefaultSystem
