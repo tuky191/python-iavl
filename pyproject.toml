@@ -19,7 +19,7 @@ optional = false
 rocksdb = { git = "https://github.com/HathorNetwork/python-rocksdb.git", branch = "master" }
 
 [tool.poetry.group.leveldb]
-optional = true
+optional = false
 
 [tool.poetry.group.leveldb.dependencies]
 plyvel = "^1.5.0"

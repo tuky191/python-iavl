@@ -1,10 +1,10 @@
+# try:
+#     from . import rocksdb as dbm
+# except ImportError:
 try:
-    from . import rocksdb as dbm
+    from . import leveldb as dbm
 except ImportError:
-    try:
-        from . import leveldb as dbm
-    except ImportError:
-        raise ImportError("no db backend supported")
+    raise ImportError("no db backend supported")
 
 
 open = dbm.open
