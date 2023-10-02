@@ -4,7 +4,7 @@ import json
 import sys
 from pathlib import Path
 from typing import List, Optional
-
+import pprint
 import click
 from hexbytes import HexBytes
 
@@ -18,6 +18,7 @@ from .utils import (
     get_node,
     get_root_node,
     iavl_latest_version,
+    prev_version,
     iter_fast_nodes,
     iter_iavl_tree,
     load_commit_infos,
@@ -94,11 +95,11 @@ def root_node(db, store: List[str], version: Optional[int]):
 @click.option("--store", "-s", required=True)
 @click.option("--reverse", is_flag=True, default=False)
 def root_versions(db, store: str, reverse: bool = False):
-    '''
+    """
     iterate all root versions
-    '''
+    """
     begin = store_prefix(store) + b"r"
-    end = store_prefix(store) + b"s" # exclusive
+    end = store_prefix(store) + b"s"  # exclusive
 
     db = dbm.open(str(db), read_only=True)
     it = db.iterkeys()
@@ -107,14 +108,14 @@ def root_versions(db, store: str, reverse: bool = False):
         for k in it:
             if k >= end:
                 break
-            print(int.from_bytes(k[len(begin):], 'big'))
+            print(int.from_bytes(k[len(begin) :], "big"))
     else:
         it = reversed(it)
         it.seek_for_prev(end)
         for k in it:
             if k < begin:
                 break
-            print(int.from_bytes(k[len(begin):], 'big'))
+            print(int.from_bytes(k[len(begin) :], "big"))
 
 
 @cli.command()
@@ -372,9 +373,12 @@ def visualize(db, version, store=None, include_prev_version=False):
     $ iavl-cli visualize --version 9 --db db --store bank | dot -Tpdf > /tmp/tree.pdf
     """
     db = dbm.open(str(db), read_only=True)
+
+    if not store:
+        raise click.UsageError("no store names are provided")
+
     if version is None:
         version = iavl_latest_version(db, store)
-
     prefix = store_prefix(store) if store is not None else b""
     root_hash = db.get(prefix + root_key(version))
     root_hash2 = None

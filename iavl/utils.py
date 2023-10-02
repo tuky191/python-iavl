@@ -5,8 +5,9 @@ from typing import Callable, List, NamedTuple, Optional, Tuple
 
 import cprotobuf
 from hexbytes import HexBytes
-
+import pprint
 from .dbm import DBM
+import sys
 
 EMPTY_HASH = hashlib.sha256().digest()
 GetNode = Callable[bytes, Optional["PersistedNode"]]

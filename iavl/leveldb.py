@@ -22,6 +22,14 @@ class Iterator:
     def seek(self, key: bytes):
         self._it.seek(key)
 
+    def seek_to_last(self):
+        # self._it.seek_to_stop()
+        # Create a reversed iterator and then use seek_to_start to position it at the last key
+        self._it = self.db.iterator(
+            include_key=self.include_key, include_value=self.include_value, reverse=True
+        )
+        self._it.seek_to_start()
+
     def __iter__(self):
         return self
 
@@ -49,6 +57,11 @@ class LevelDB:
 
     def iteritems(self):
         return Iterator(self.db)
+
+    def seek_to_last(self):
+        it = Iterator(self.db)
+        it.seek_to_last()
+        return it
 
 
 def open(dir, read_only: bool = False):
