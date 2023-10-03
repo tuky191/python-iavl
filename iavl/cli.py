@@ -407,7 +407,7 @@ def visualize(db, version, store=None, include_prev_version=False):
 @click.option(
     "--out-dir",
     help="the output directory to save the data files",
-    type=click.Path(exists=True),
+    type=click.Path(),
     required=True,
 )
 def dump_changesets(db, start_version, end_version, store: Optional[str], out_dir: str):
@@ -416,6 +416,9 @@ def dump_changesets(db, start_version, end_version, store: Optional[str], out_di
     with compatible format with file streamer.
     end_version is exclusive.
     """
+    out_dir_path = Path(out_dir)
+    out_dir_path.mkdir(parents=True, exist_ok=True)
+
     db = dbm.open(str(db), read_only=True)
     prefix = store_prefix(store) if store is not None else b""
     ndb = NodeDB(db, prefix=prefix)
@@ -427,13 +430,28 @@ def dump_changesets(db, start_version, end_version, store: Optional[str], out_di
 
 
 @cli.command()
-@click.argument("file", type=click.Path(exists=True))
-def print_changeset(file):
+@click.argument("file_or_dir", type=click.Path(exists=True))
+def print_changeset(file_or_dir):
     """
-    decode and print the content of changeset files
+    Decode and print the content of changeset files.
+    Accepts either a single file or a directory containing multiple files.
     """
-    for item in diff.parse_change_set(Path(file).read_bytes()):
-        print(json.dumps(item.as_json()))
+    path = Path(file_or_dir)
+
+    if path.is_file():
+        for item in diff.parse_change_set(path.read_bytes()):
+            print(json.dumps(item.as_json()))
+    elif path.is_dir():
+        # Sort files by their names
+        sorted_child_paths = sorted(path.iterdir(), key=lambda p: p.name)
+
+        for child_path in sorted_child_paths:
+            if child_path.is_file():
+                print(f"Processing file: {child_path}")
+                for item in diff.parse_change_set(child_path.read_bytes()):
+                    print(json.dumps(item.as_json()))
+    else:
+        print(f"{file_or_dir} is neither a file nor a directory.")
 
 
 @cli.command()

@@ -1,4 +1,5 @@
 import plyvel
+import pprint
 
 
 class Iterator:
@@ -9,6 +10,7 @@ class Iterator:
         self.include_key = include_key
         self.include_value = include_value
         self.reversed = reversed
+        self.current_key = None
 
         self._it = db.iterator(
             include_key=include_key, include_value=include_value, reverse=reversed
@@ -21,6 +23,21 @@ class Iterator:
 
     def seek(self, key: bytes):
         self._it.seek(key)
+
+    def seek_for_prev(self, key: bytes):
+        self._it.seek(key)
+        self.current_key = next(self._it, (None, None))
+
+        if self.current_key != key:
+            try:
+                prev_key = next(self._it, (None, None))
+                self.current_key = prev_key
+                if prev_key is not None:
+                    self._it.seek(prev_key)
+                else:
+                    self._it.seek_to_start()
+            except StopIteration:
+                self._it.seek_to_start()
 
     def seek_to_last(self):
         # self._it.seek_to_stop()
